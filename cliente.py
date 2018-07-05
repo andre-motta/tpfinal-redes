@@ -1,24 +1,55 @@
 #!/usr/bin/env python3
-import socket, sys, time, struct
+import sys, socket, select
+import unidecode
 
 
-cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#cliente.settimeout(15.0)
-cliente.connect((sys.argv[1], int(sys.argv[2])))
+if __name__ == '__main__':
 
-mensagemFinal = '' ##ler da stdin
+    print("CLIENTE")
 
-mensagemCodificada = []
+    if (len(sys.argv) < 4):
+        print("Erro: Faltam argumentos.")
+        print("Formato: client.py portaLocal IpServidor PortaServidor")
+        sys.exit()
 
+    # Input arguments
+    LocalHost = '127.0.1.2'
+    LocalPort  = int(sys.argv[1])
+    ServerIP   = sys.argv[2]
+    ServerPort = int(sys.argv[3])
 
-mensagemFinal = ''.join(mensagemCodificada)
+    udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
 
-cliente.send(mensagemFinal.encode('ASCII', 'ignore'))
-#time.sleep(0.2)
+    sys.stdout.flush()
 
+    # Socket binded, reading userInput
+    while True:
+        socketList = [udp]
 
-#time.sleep(0.2)
-#Acho que devemos enviar primeiro um numero q é o numero de mensagens e dps cada mensagem pra gt fazer um loop disso aqui \/
-mensagem = cliente.recv(2048)
+        # Readable sockets
+        readSockets, writeSockets, errorSockets = select.select(socketList, [sys.stdin], [])
 
-print(mensagem.decode())
+        for sock in readSockets:
+            # Receving message
+            if sock == udp:
+                message, conn = sock.recvfrom(512)
+                if not message:
+                    print("Disconnected from server!")
+                    sys.exit()
+                else:
+                    # Print message
+                    sys.stdout.write(message.decode("utf-8"))
+                    sys.stdout.write("\n")
+                    sys.stdout.flush()
+
+            # User enter message
+        for w in writeSockets:
+            msg = sys.stdin.readline().strip()
+
+            # Change accentuated string to non-accentuated
+            msg = unidecode.unidecode(msg)
+            
+            # Convert to bytes and send to server
+            msg = bytes(msg, "UTF-8")
+            udp.sendto(msg, (ServerIP, ServerPort))
+            sys.stdout.flush()
