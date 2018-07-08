@@ -34,10 +34,10 @@ if __name__ == '__main__':
             if sock == udp:
                 message, conn = sock.recvfrom(512)
                 if not message:
-                    print("Disconnected from server!")
+                    print("Desconectado do servidor!")
                     sys.exit()
                 else:
-                    # Print message
+                    print("Tweets recebidos:")
                     sys.stdout.write(message.decode("utf-8"))
                     sys.stdout.write("\n")
                     sys.stdout.flush()
@@ -49,7 +49,7 @@ if __name__ == '__main__':
             # Change accentuated string to non-accentuated
             msg = unidecode.unidecode(msg)
             
-            # Convert to bytes and send to server
+            # Convert to bytes and send to server            
             msg = bytes(msg, "UTF-8")
             udp.sendto(msg, (ServerIP, ServerPort))
             sys.stdout.flush()
