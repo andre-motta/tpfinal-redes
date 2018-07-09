@@ -22,34 +22,28 @@ if __name__ == '__main__':
 
     sys.stdout.flush()
 
-    # Socket binded, reading userInput
     while True:
         socketList = [udp]
 
-        # Readable sockets
         readSockets, writeSockets, errorSockets = select.select(socketList, [sys.stdin], [])
 
         for sock in readSockets:
-            # Receving message
             if sock == udp:
                 message, conn = sock.recvfrom(512)
                 if not message:
                     print("Desconectado do servidor!")
                     sys.exit()
                 else:
-                    print("Tweets recebidos:")
+                    print("Mensagens recebidas:")
                     sys.stdout.write(message.decode("utf-8"))
                     sys.stdout.write("\n")
                     sys.stdout.flush()
 
-            # User enter message
         for w in writeSockets:
             msg = sys.stdin.readline().strip()
 
-            # Change accentuated string to non-accentuated
             msg = unidecode.unidecode(msg)
             
-            # Convert to bytes and send to server            
             msg = bytes(msg, "UTF-8")
             udp.sendto(msg, (ServerIP, ServerPort))
             sys.stdout.flush()
